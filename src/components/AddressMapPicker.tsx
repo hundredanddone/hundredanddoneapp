@@ -66,10 +66,18 @@ export function AddressMapPicker({
     }
   }, [coords]);
 
+  /**
+   * Moving the pin is an explicit act, so the address follows it. The previous
+   * behaviour only back-filled an empty field, which let the text and the coordinates
+   * drift apart silently — an address in Maharashtra saved against a pin in Siberia,
+   * with nothing on screen to show the mismatch. Discovery matches on the coordinates,
+   * so that divergence made providers invisible. The field stays editable for manual
+   * correction after the pin is placed.
+   */
   const applyCoords = async (next: LatLng) => {
     onChangeCoords(next);
     const resolved = await reverseGeocode(next);
-    if (resolved && !address.trim()) onChangeAddress(resolved);
+    if (resolved) onChangeAddress(resolved);
   };
 
   const handleUseCurrentLocation = async () => {
@@ -129,7 +137,7 @@ export function AddressMapPicker({
 
       <Text variant="caption" color="textMuted">
         {coords
-          ? `Pin: ${coords.latitude.toFixed(5)}, ${coords.longitude.toFixed(5)} — tap or drag to adjust.`
+          ? `Pin: ${coords.latitude.toFixed(5)}, ${coords.longitude.toFixed(5)} — patients find you by this pin, not by the text below.`
           : 'Tap the map or use the locate button to drop a pin.'}
       </Text>
       {status === 'denied' ? (
