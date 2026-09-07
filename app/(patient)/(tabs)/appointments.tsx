@@ -52,7 +52,7 @@ export default function PatientAppointmentsScreen() {
           <AppointmentCard
             appointment={item}
             perspective="patient"
-            onPress={() => router.push(`/appointment/${item.id}`)}
+            onPress={() => router.push(`/(patient)/appointment/${item.id}`)}
           />
         )}
       />

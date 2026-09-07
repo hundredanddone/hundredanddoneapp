@@ -115,7 +115,7 @@ export default function OrgDashboardScreen() {
               key={appointment.id}
               appointment={appointment}
               perspective="org"
-              onPress={() => router.push(`/appointment/${appointment.id}`)}
+              onPress={() => router.push(`/(org)/appointment/${appointment.id}`)}
             />
           ))
         )}

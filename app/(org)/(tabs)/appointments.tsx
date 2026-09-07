@@ -85,7 +85,7 @@ export default function OrgAppointmentsScreen() {
           <AppointmentCard
             appointment={item}
             perspective="org"
-            onPress={() => router.push(`/appointment/${item.id}`)}
+            onPress={() => router.push(`/(org)/appointment/${item.id}`)}
           />
         )}
       />
