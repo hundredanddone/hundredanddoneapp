@@ -69,3 +69,34 @@ select b.name as searched_from, d.*
        public.discover_organizations(b.lat, b.lng, 50, 'clinic', null) d
  where b.lat is not null
  order by d.distance_km;
+
+-- ---------------------------------------------------------------------------
+-- 4. Fix a branch pin that disagrees with its address
+--
+-- Discovery matches on org_branches.lat/lng and never reads the address text, so a
+-- pin in the wrong place makes a provider invisible while the address still looks
+-- correct. Before the AddressMapPicker fix, moving the pin left an already-filled
+-- address untouched, which let the two diverge silently.
+--
+-- Sanity-check every pin. Anything far from where you expect is the problem.
+-- ---------------------------------------------------------------------------
+
+select
+  b.id as branch_id,
+  o.name,
+  b.address,
+  b.lat,
+  b.lng
+from public.org_branches b
+join public.organizations o on o.id = b.organization_id
+order by o.created_at desc;
+
+-- Move a pin (example: Ulhasnagar, Maharashtra):
+-- update public.org_branches
+--    set lat = 19.2215, lng = 73.1645
+--  where id = 'PASTE-BRANCH-UUID';
+
+-- Home-visit providers keep their service area centre separately -- move it too:
+-- update public.home_visit_service_areas
+--    set center_lat = 19.2215, center_lng = 73.1645
+--  where organization_id = 'PASTE-ORG-UUID';
