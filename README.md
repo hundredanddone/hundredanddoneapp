@@ -134,12 +134,15 @@ then re-run `npx expo prebuild --platform ios` (on macOS) or let EAS rebuild.
 Supabase Dashboard → **Authentication → Providers → Google**:
 
 1. Enable the provider.
-2. Under **Authorized Client IDs**, add **all three** client IDs, comma-separated.
-   This list is what `supabase.auth.signInWithIdToken({ provider: 'google' })` validates
-   the incoming ID token against — if the web client ID is missing, every native sign-in
-   fails.
-3. The Client Secret is only needed for the web OAuth redirect flow, which this app does
-   not use. Leaving "Skip nonce checks" off is fine.
+2. Under **Authorized Client IDs**, add **all three** client IDs, comma-separated, with
+   the **web client ID first**. This list is what
+   `supabase.auth.signInWithIdToken({ provider: 'google' })` validates the incoming ID
+   token against — if the web client ID is missing, every native sign-in fails.
+3. Leave **Client Secret** blank. It is only used by the web OAuth redirect flow, which
+   this app does not use.
+4. Enable **Skip nonce check**. This is required for the native iOS flow: the ID token
+   `@react-native-google-signin/google-signin` returns does not carry a nonce Supabase
+   can verify, so leaving it off makes iOS sign-in fail.
 
 ---
 
