@@ -36,11 +36,6 @@
         }
       }
     },
-    "web": {
-      "bundler": "metro",
-      "output": "static",
-      "favicon": "./assets/images/favicon.png"
-    },
     "plugins": [
       "expo-router",
       "expo-secure-store",
@@ -80,6 +75,15 @@
           "appToken": "spb_REPLACE_WITH_STALLION_APP_TOKEN",
           "publicSigningKey": "REPLACE_WITH_STALLION_PUBLIC_KEY"
         }
+      ],
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "enableProguardInReleaseBuilds": true,
+            "enableShrinkResourcesInReleaseBuilds": true
+          }
+        }
       ]
     ],
     "experiments": {
@@ -91,12 +95,6 @@
         "projectId": "7f78c3a0-d440-4826-bc53-6d2adc7d98ec"
       }
     },
-    "owner": "hundredanddones-team",
-    "runtimeVersion": {
-      "policy": "appVersion"
-    },
-    "updates": {
-      "url": "https://u.expo.dev/7f78c3a0-d440-4826-bc53-6d2adc7d98ec"
-    }
+    "owner": "hundredanddones-team"
   }
 }

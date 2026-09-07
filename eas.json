@@ -11,7 +11,6 @@
       "extends": "base",
       "developmentClient": true,
       "distribution": "internal",
-      "channel": "development",
       "ios": {
         "simulator": true,
         "resourceClass": "m-medium"
@@ -33,7 +32,6 @@
     "preview": {
       "extends": "base",
       "distribution": "internal",
-      "channel": "preview",
       "ios": {
         "simulator": false,
         "resourceClass": "m-medium"
@@ -48,7 +46,6 @@
     "production": {
       "extends": "base",
       "distribution": "store",
-      "channel": "production",
       "autoIncrement": true,
       "ios": {
         "resourceClass": "m-medium"
