@@ -200,12 +200,14 @@ create table public.appointments (
   scheduled_at timestamptz not null,
   status text not null default 'pending'
     check (status in ('pending', 'confirmed', 'en_route', 'in_progress', 'completed', 'cancelled', 'no_show')),
-  address_id uuid references public.patient_addresses (id) on delete set null,
+  -- RESTRICT, not SET NULL: nulling this would violate appointments_home_needs_address
+  -- below and surface as a confusing check violation when a patient deletes an address.
+  address_id uuid references public.patient_addresses (id) on delete restrict,
   fee numeric(10, 2),
   payment_status text not null default 'unpaid'
     check (payment_status in ('unpaid', 'paid', 'refunded')),
   created_at timestamptz not null default now(),
-  -- A home visit has to say where; a clinic visit must not.
+  -- A home visit has to say where. Clinic visits may leave it null.
   constraint appointments_home_needs_address
     check (visit_type <> 'home' or address_id is not null)
 );
@@ -213,9 +215,17 @@ create table public.appointments (
 create index appointments_patient_idx on public.appointments (patient_id, scheduled_at desc);
 create index appointments_org_idx on public.appointments (organization_id, scheduled_at);
 
--- One live booking per organization per slot. Cancelled/no-show slots free up again.
+-- One live booking per doctor per slot. When no doctor is named the organization
+-- itself is the resource, which is right for an independent doctor and a small clinic;
+-- a hospital that assigns doctor_member_id gets per-doctor concurrency instead of being
+-- capped at one appointment per slot across the whole building.
+-- Cancelled and no-show slots free up again.
 create unique index appointments_no_double_booking
-  on public.appointments (organization_id, scheduled_at)
+  on public.appointments (
+    organization_id,
+    coalesce(doctor_member_id, organization_id),
+    scheduled_at
+  )
   where status not in ('cancelled', 'no_show');
 
 create table public.patient_records (

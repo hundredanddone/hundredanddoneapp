@@ -32,5 +32,15 @@ export async function createPatientAddress(
 
 export async function deletePatientAddress(addressId: string): Promise<void> {
   const { error } = await supabase.from('patient_addresses').delete().eq('id', addressId);
-  if (error) throw error;
+  if (error) {
+    // appointments.address_id is ON DELETE RESTRICT, so an address attached to any
+    // home visit (past or upcoming) cannot be removed. Say so in words a patient reads.
+    if (error.code === '23503') {
+      throw new Error(
+        'This address is attached to a home visit, so it cannot be deleted. ' +
+          'Cancel or complete that appointment first.',
+      );
+    }
+    throw error;
+  }
 }

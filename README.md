@@ -145,6 +145,17 @@ Supabase Dashboard → **Authentication → Providers → Google**:
 
 ## Supabase setup
 
+### This project
+
+|              |                              |
+| ------------ | ---------------------------- |
+| Project name | hundredanddone's Project     |
+| Project ref  | `moherjbdvepcckwyqhao`       |
+| Region       | `ap-southeast-1` (Singapore) |
+
+`supabase/config.toml` is committed; `supabase/.temp/` (which holds the linked ref) is
+gitignored, so each developer links their own checkout once.
+
 ### Applying the migrations
 
 Two migrations live in `supabase/migrations/`:
@@ -156,10 +167,19 @@ Two migrations live in `supabase/migrations/`:
 **With the Supabase CLI (recommended):**
 
 ```bash
-npm install -g supabase          # or: brew install supabase/tap/supabase
-supabase login
-supabase link --project-ref <your-project-ref>
-supabase db push
+npx supabase login                                   # opens a browser
+npx supabase link --project-ref moherjbdvepcckwyqhao # prompts for the DB password
+npx supabase db push
+```
+
+`login` writes an access token under `~/.supabase/`, and `link` stores the database
+password in the OS keyring — so `db push` afterwards needs no further input. Neither
+secret needs to be typed anywhere except those two prompts.
+
+Verify afterwards with:
+
+```bash
+npx supabase migration list
 ```
 
 **Without the CLI:** open the Supabase Dashboard → SQL Editor, paste the contents of
@@ -503,9 +523,10 @@ clients) and changing it later means re-registering the OAuth clients and creati
 app record in App Store Connect and Play Console. Each dot-separated segment starts with
 a letter, as required.
 
-> The generated URL scheme is `hundredanddone`, **not** `100anddone`. A URL scheme
-> cannot start with a digit, so the template's default (derived from the folder name)
-> would have broken deep links and the OAuth callback.
+> The Expo `slug`, the URL `scheme`, the npm package name and the Supabase local
+> `project_id` are all `hundredanddone`. A URL scheme cannot start with a digit, so the
+> template's original `100anddone` (derived from the folder name) would have broken deep
+> links and the OAuth callback. The user-facing app name stays **100 and Done**.
 
 ---
 
