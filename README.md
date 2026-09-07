@@ -158,11 +158,14 @@ gitignored, so each developer links their own checkout once.
 
 ### Applying the migrations
 
-Two migrations live in `supabase/migrations/`:
+Three migrations live in `supabase/migrations/`:
 
 - `0001_init.sql` — every table, Row Level Security on all of them, the RLS helper
   functions, and the `discover_organizations` RPC used for radius search.
 - `0002_storage.sql` — the four storage buckets and their policies.
+- `0003_restrict_helper_functions.sql` — revokes the implicit `PUBLIC` EXECUTE grant on
+  the RLS helpers so PostgREST stops publishing them as anonymous RPCs, and scopes
+  `org_treats_patient` to the caller's own organizations.
 
 **With the Supabase CLI (recommended):**
 
@@ -218,7 +221,18 @@ specialty, branch location, ratings, price-from) — never patient data.
 
 The helpers are `SECURITY DEFINER` on purpose: a policy on `org_members` needs to ask
 "is the caller a member of this org?" without re-entering that table's own policies and
-recursing.
+recursing. Because they live in `public`, PostgREST would otherwise publish each one as
+an anonymous RPC — `0003` revokes that. Only `authenticated` and `service_role` keep
+EXECUTE, which is all a policy expression needs.
+
+Verified against the live project as `anon`:
+
+| Request                                    | Expected                                             |
+| ------------------------------------------ | ---------------------------------------------------- |
+| `POST /rest/v1/profiles`                   | `401` — `new row violates row-level security policy` |
+| `POST /rest/v1/rpc/is_org_member`          | `401` — `permission denied for function`             |
+| `POST /rest/v1/rpc/org_treats_patient`     | `401` — `permission denied for function`             |
+| `POST /rest/v1/rpc/discover_organizations` | `200 []` — the intended public surface               |
 
 ### Storage buckets
 
