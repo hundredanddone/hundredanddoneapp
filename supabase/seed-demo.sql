@@ -29,9 +29,6 @@ declare
   v_day int;
   r record;
 begin
-  -- Demo orgs need an owner that already exists, because organizations.owner_profile_id
-  -- references profiles -> auth.users. We reuse the oldest real profile rather than
-  -- forging auth.users rows, which is version-fragile and can break sign-in.
   -- Prefer an explicit email, else the first profile that onboarded as an org, else
   -- any profile. organizations.owner_profile_id references profiles -> auth.users, so
   -- the owner must already exist; forging auth.users rows is version-fragile and can
