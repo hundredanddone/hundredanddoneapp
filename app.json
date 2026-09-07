@@ -27,9 +27,9 @@
       "predictiveBackGestureEnabled": false,
       "permissions": [
         "android.permission.ACCESS_COARSE_LOCATION",
-        "android.permission.ACCESS_FINE_LOCATION",
-        "android.permission.RECORD_AUDIO"
+        "android.permission.ACCESS_FINE_LOCATION"
       ],
+      "blockedPermissions": ["android.permission.RECORD_AUDIO"],
       "config": {
         "googleMaps": {
           "apiKey": "REPLACE_WITH_ANDROID_GOOGLE_MAPS_API_KEY"
@@ -91,6 +91,12 @@
         "projectId": "7f78c3a0-d440-4826-bc53-6d2adc7d98ec"
       }
     },
-    "owner": "hundredanddones-team"
+    "owner": "hundredanddones-team",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/7f78c3a0-d440-4826-bc53-6d2adc7d98ec"
+    }
   }
 }
