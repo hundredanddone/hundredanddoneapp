@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import MapView, { Circle, Marker, PROVIDER_DEFAULT, type Region } from 'react-native-maps';
 
 import { radius, spacing } from '@/constants/theme';
