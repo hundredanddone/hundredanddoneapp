@@ -169,8 +169,10 @@ export default function BookingScreen() {
           {addresses.length === 0 ? (
             <Banner
               tone="warning"
-              title="No saved address"
-              message="Add an address from your profile before booking a home visit."
+              title="No saved address yet"
+              message="A home visit needs somewhere to go. Add one and you'll come straight back here."
+              actionLabel="Add an address"
+              onPressAction={() => router.push('/(patient)/address/new')}
             />
           ) : (
             addresses.map((address) => (
@@ -196,6 +198,13 @@ export default function BookingScreen() {
               </Card>
             ))
           )}
+          <Button
+            label={addresses.length > 0 ? 'Add another address' : 'Add an address'}
+            variant="ghost"
+            size="md"
+            icon="add"
+            onPress={() => router.push('/(patient)/address/new')}
+          />
         </View>
       ) : null}
     </Screen>
