@@ -39,3 +39,10 @@ yarn-error.*
 # generated native folders
 /ios
 /android
+
+# local env files
+.env
+
+# Stallion / release bundles
+build-ios/
+build-android/
