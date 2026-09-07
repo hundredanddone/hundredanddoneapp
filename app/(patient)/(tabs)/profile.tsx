@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
+import { router } from 'expo-router';
 
 import { Avatar, Banner, Button, Card, Screen, Text } from '@/components';
 import { spacing } from '@/constants/theme';
@@ -54,7 +55,7 @@ export default function PatientProfileScreen() {
         </View>
         {addresses.length === 0 ? (
           <Text variant="caption" color="textMuted" style={styles.sectionBody}>
-            You have no saved addresses yet. You can add one while booking a home visit.
+            You have no saved addresses yet. Add one to book home visits.
           </Text>
         ) : (
           <View style={styles.sectionBody}>
@@ -68,6 +69,15 @@ export default function PatientProfileScreen() {
             ))}
           </View>
         )}
+        <View style={styles.cardAction}>
+          <Button
+            label="Add an address"
+            variant="secondary"
+            size="md"
+            icon="add"
+            onPress={() => router.push('/(patient)/address/new')}
+          />
+        </View>
       </Card>
 
       <Button
@@ -87,4 +97,5 @@ const styles = StyleSheet.create({
   sectionHeader: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
   sectionBody: { marginTop: spacing.md, gap: spacing.md },
   addressRow: { gap: 2 },
+  cardAction: { marginTop: spacing.lg },
 });
