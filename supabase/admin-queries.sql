@@ -100,3 +100,38 @@ order by o.created_at desc;
 -- update public.home_visit_service_areas
 --    set center_lat = 19.2215, center_lng = 73.1645
 --  where organization_id = 'PASTE-ORG-UUID';
+
+-- ---------------------------------------------------------------------------
+-- 5. De-duplicate demo providers
+--
+-- Running seed-demo.sql twice creates two of everything, because it has no
+-- uniqueness constraint on name. This keeps the oldest row per name and deletes the
+-- rest, cascading to their branches, services, offerings, availability and any
+-- appointments booked against the duplicates.
+-- ---------------------------------------------------------------------------
+
+-- Count first:
+select name, count(*)
+  from public.organizations
+ where bio like '%[demo data]%'
+ group by name
+ having count(*) > 1
+ order by name;
+
+-- Then remove the extras:
+-- delete from public.organizations o
+--  where o.bio like '%[demo data]%'
+--    and o.id not in (
+--      select distinct on (name) id
+--        from public.organizations
+--       where bio like '%[demo data]%'
+--       order by name, created_at
+--    );
+
+-- Or start clean and re-run seed-demo.sql exactly once:
+-- delete from public.organizations where bio like '%[demo data]%';
+
+-- Audit which providers bypass the distance filter (must be empty in production):
+select id, name, verification_status
+  from public.organizations
+ where always_discoverable;
