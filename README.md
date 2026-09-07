@@ -558,8 +558,11 @@ patient/org surfaces. Things deliberately left for later:
 - **Live tracking is static.** The home-visit screen shows the patient's pin and an
   "on the way" banner; there is no driver-location stream yet. That needs a
   `doctor_locations` table plus a Supabase Realtime subscription.
-- **No admin surface for verification.** `verification_status` has to be flipped by hand
-  in the Supabase dashboard until an internal tool exists.
+- **No admin surface for verification.** `organizations.verification_status` has to be
+  flipped from `pending` to `verified` by hand (Dashboard -> Table Editor -> organizations)
+  until an internal tool exists. `supabase/admin-queries.sql` has the approval statement
+  plus a diagnostic that shows which of the four `discover_organizations` gates an org is
+  failing, since the app cannot tell you.
 - **Discovery uses haversine, not PostGIS.** Fine for hundreds of providers; swap in
   `earthdistance` or PostGIS with a GiST index before it becomes thousands.
 - **`react-native-maps`, not `expo-maps`.** See below.
