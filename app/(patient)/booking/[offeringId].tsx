@@ -56,7 +56,7 @@ export default function BookingScreen() {
         addressId: isHomeVisit ? addressId : null,
         fee: offering.price,
       });
-      router.replace(`/appointment/${appointment.id}`);
+      router.replace(`/(patient)/appointment/${appointment.id}`);
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Could not book this appointment.');
     }

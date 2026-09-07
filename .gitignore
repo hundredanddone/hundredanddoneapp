@@ -46,3 +46,6 @@ yarn-error.*
 # Stallion / release bundles
 build-ios/
 build-android/
+
+# EAS submit credentials
+google-play-service-account.json
