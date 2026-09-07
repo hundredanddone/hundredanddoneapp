@@ -65,11 +65,14 @@ begin
       ('Riverside Medical Centre',    'hospital',           null,                -0.048,  -0.039,  true,   true,   750,  30)
     ) as t(name, org_type, specialty, dlat, dlng, clinic, home, price, duration)
   loop
+    -- always_discoverable bypasses the distance filter, so these show up from any
+    -- location regardless of v_base_lat / v_base_lng. Real providers must leave it false.
     insert into public.organizations
-      (owner_profile_id, org_type, name, specialty, bio, verification_status, onboarding_step)
+      (owner_profile_id, org_type, name, specialty, bio, verification_status,
+       onboarding_step, always_discoverable)
     values
       (v_owner, r.org_type, r.name, r.specialty,
-       r.name || ' — sample provider seeded for testing. [demo data]', 'verified', null)
+       r.name || ' — sample provider seeded for testing. [demo data]', 'verified', null, true)
     returning id into v_org;
 
     -- Membership is what the org-side UI keys off (useActiveOrganization reads
