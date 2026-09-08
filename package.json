@@ -63,7 +63,8 @@
     "typecheck": "tsc --noEmit",
     "types:supabase": "supabase gen types typescript --project-id $SUPABASE_PROJECT_ID > src/types/database.generated.ts",
     "bundle:ios": "expo export:embed --platform ios --dev false --reset-cache --bundle-output ./build-ios/main.jsbundle --assets-dest ./build-ios --bytecode",
-    "bundle:android": "expo export:embed --platform android --dev false --reset-cache --bundle-output ./build-android/index.android.bundle --assets-dest ./build-android --bytecode"
+    "bundle:android": "expo export:embed --platform android --dev false --reset-cache --bundle-output ./build-android/index.android.bundle --assets-dest ./build-android --bytecode",
+    "check:contrast": "node scripts/check-contrast.mjs"
   },
   "private": true
 }

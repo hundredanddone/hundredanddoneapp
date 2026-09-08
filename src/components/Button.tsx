@@ -48,11 +48,13 @@ export function Button({
     danger: { backgroundColor: colors.danger },
   };
   const contentColor =
-    variant === 'primary' || variant === 'danger'
+    variant === 'primary'
       ? colors.onPrimary
-      : variant === 'ghost'
-        ? colors.primary
-        : colors.text;
+      : variant === 'danger'
+        ? colors.onDanger
+        : variant === 'ghost'
+          ? colors.primary
+          : colors.text;
 
   return (
     <Pressable
