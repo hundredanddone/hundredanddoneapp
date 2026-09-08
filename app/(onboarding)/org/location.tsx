@@ -40,7 +40,12 @@ export default function OrgLocationScreen() {
   const [error, setError] = useState<string | null>(null);
 
   const values = draft ?? savedValues(branch);
-  const update = (patch: Partial<LocationDraft>) => setDraft({ ...values, ...patch });
+  // Functional update: AddressMapPicker fires onChangeCoords then, after an await,
+  // onChangeAddress. Spreading a `values` captured at render time meant the second call
+  // rebuilt the draft from a snapshot where coords was still null, silently discarding
+  // the pin and disabling Continue. Reading `prev` keeps both writes.
+  const update = (patch: Partial<LocationDraft>) =>
+    setDraft((prev) => ({ ...(prev ?? savedValues(branch)), ...patch }));
 
   const handleNext = async (org: Organization) => {
     setSaving(true);

@@ -3,7 +3,7 @@ import { StyleSheet, View } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { router } from 'expo-router';
 
-import { Avatar, Banner, Button, Card, Screen, Text } from '@/components';
+import { Avatar, Banner, Button, Card, Screen, Text, ThemeToggle } from '@/components';
 import { spacing } from '@/constants/theme';
 import { usePatientAddresses } from '@/features/booking';
 import { useTheme } from '@/hooks/useTheme';
@@ -78,6 +78,10 @@ export default function PatientProfileScreen() {
             onPress={() => router.push('/(patient)/address/new')}
           />
         </View>
+      </Card>
+
+      <Card>
+        <ThemeToggle />
       </Card>
 
       <Button

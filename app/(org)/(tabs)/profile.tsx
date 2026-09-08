@@ -3,7 +3,16 @@ import { StyleSheet, View } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { router, type Href } from 'expo-router';
 
-import { Avatar, Banner, Button, Card, LoadingScreen, Screen, Text } from '@/components';
+import {
+  Avatar,
+  Banner,
+  Button,
+  Card,
+  LoadingScreen,
+  Screen,
+  Text,
+  ThemeToggle,
+} from '@/components';
 import { spacing } from '@/constants/theme';
 import { useActiveOrganization } from '@/features/org-setup';
 import { useTheme } from '@/hooks/useTheme';
@@ -113,6 +122,10 @@ export default function OrgProfileScreen() {
           ))}
         </View>
       ) : null}
+
+      <Card>
+        <ThemeToggle />
+      </Card>
 
       <Button
         label="Sign out"

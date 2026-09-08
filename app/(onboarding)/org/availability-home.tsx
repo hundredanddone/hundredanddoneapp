@@ -74,7 +74,10 @@ export default function HomeVisitAvailabilityScreen() {
 
   const saved = useMemo(() => savedValues(rules, branch), [rules, branch]);
   const values = draft ?? saved;
-  const update = (patch: Partial<HomeVisitDraft>) => setDraft({ ...values, ...patch });
+  // Functional update — see the note in org/location.tsx. Two callbacks landing in the
+  // same render would otherwise drop the first write.
+  const update = (patch: Partial<HomeVisitDraft>) =>
+    setDraft((prev) => ({ ...(prev ?? saved), ...patch }));
 
   const handleSave = async (org: Organization, keepEnabled: boolean) => {
     setSaving(true);
