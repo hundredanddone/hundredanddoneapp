@@ -11,6 +11,7 @@ export { Screen } from './Screen';
 export { SelectableCard } from './SelectableCard';
 export { StepProgress } from './StepProgress';
 export { Text } from './Text';
+export { ThemeToggle } from './ThemeToggle';
 export { TextField } from './TextField';
 export { TimeSelect } from './TimeSelect';
 export { VisitTypeToggle } from './VisitTypeToggle';

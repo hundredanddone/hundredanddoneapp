@@ -52,7 +52,10 @@ export default function OrgBasicInfoScreen() {
   const [error, setError] = useState<string | null>(null);
 
   const values = draft ?? savedValues(organization);
-  const update = (patch: Partial<BasicInfoDraft>) => setDraft({ ...values, ...patch });
+  // Functional update — see the note in org/location.tsx. handlePickLogo writes after an
+  // await, so a render-time snapshot could clobber edits made while the upload ran.
+  const update = (patch: Partial<BasicInfoDraft>) =>
+    setDraft((prev) => ({ ...(prev ?? savedValues(organization)), ...patch }));
 
   const isDoctor = organization?.org_type === 'independent_doctor';
 

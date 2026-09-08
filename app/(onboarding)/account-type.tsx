@@ -5,6 +5,7 @@ import { router } from 'expo-router';
 import { Banner, Button, Screen, SelectableCard, Text } from '@/components';
 import { spacing } from '@/constants/theme';
 import { updateProfile } from '@/features/auth';
+import { signOut } from '@/lib/googleAuth';
 import { useAuthStore } from '@/stores/authStore';
 import type { AccountRole } from '@/types';
 
@@ -17,6 +18,19 @@ export default function AccountTypeScreen() {
   const [selected, setSelected] = useState<AccountRole | null>(profile?.role ?? null);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [signingOut, setSigningOut] = useState(false);
+
+  const handleSignOut = async () => {
+    setSigningOut(true);
+    setError(null);
+    try {
+      await signOut();
+      // The root layout's auth listener routes back to (auth).
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Could not sign out.');
+      setSigningOut(false);
+    }
+  };
 
   const handleContinue = async () => {
     if (!selected || !session) return;
@@ -25,7 +39,7 @@ export default function AccountTypeScreen() {
     try {
       const updated = await updateProfile(session.user.id, { role: selected });
       setProfile(updated);
-      router.replace(selected === 'patient' ? '/patient/profile' : '/org/org-type');
+      router.push(selected === 'patient' ? '/patient/profile' : '/org/org-type');
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Could not save your choice.');
     } finally {
@@ -38,12 +52,22 @@ export default function AccountTypeScreen() {
       scroll
       edges={{ top: true, bottom: true }}
       footer={
-        <Button
-          label="Continue"
-          onPress={() => void handleContinue()}
-          disabled={!selected}
-          loading={saving}
-        />
+        <View style={styles.footer}>
+          <Button
+            label="Continue"
+            onPress={() => void handleContinue()}
+            disabled={!selected}
+            loading={saving}
+          />
+          <Button
+            label="Use a different account"
+            variant="ghost"
+            size="md"
+            disabled={saving || signingOut}
+            loading={signingOut}
+            onPress={() => void handleSignOut()}
+          />
+        </View>
       }
     >
       <View style={styles.header}>
@@ -85,4 +109,5 @@ export default function AccountTypeScreen() {
 const styles = StyleSheet.create({
   header: { gap: spacing.sm, paddingTop: spacing.xl },
   options: { gap: spacing.md },
+  footer: { gap: spacing.xs },
 });
