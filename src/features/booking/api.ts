@@ -8,6 +8,8 @@ import type {
   VisitType,
 } from '@/types';
 
+const FREE_STATUSES: Appointment['status'][] = ['cancelled', 'no_show'];
+
 export interface Slot {
   /** 'HH:mm' in the provider's local time. */
   time: string;
@@ -50,7 +52,7 @@ export async function fetchSlots(query: SlotQuery): Promise<Slot[]> {
       .eq('date', query.date),
     supabase
       .from('appointments')
-      .select('scheduled_at, status')
+      .select('scheduled_at, status, doctor_member_id')
       .eq('organization_id', query.organizationId)
       .gte('scheduled_at', day.startOf('day').toISOString())
       .lte('scheduled_at', day.endOf('day').toISOString()),
@@ -70,9 +72,21 @@ export async function fetchSlots(query: SlotQuery): Promise<Slot[]> {
       rule.doctor_member_id === query.doctorMemberId,
   );
 
+  // Cancelled and no-show slots are free again, matching the `appointments_no_double_booking`
+  // index. When a doctor is chosen, only that doctor's bookings block the slot, so one
+  // doctor's appointment does not hide the same time for their colleagues.
   const taken = new Set(
-    ((bookedResult.data ?? []) as Pick<Appointment, 'scheduled_at' | 'status'>[])
-      .filter((appointment) => appointment.status !== 'cancelled')
+    (
+      (bookedResult.data ?? []) as Pick<
+        Appointment,
+        'scheduled_at' | 'status' | 'doctor_member_id'
+      >[]
+    )
+      .filter((appointment) => !FREE_STATUSES.includes(appointment.status))
+      .filter(
+        (appointment) =>
+          !query.doctorMemberId || appointment.doctor_member_id === query.doctorMemberId,
+      )
       .map((appointment) => dayjs(appointment.scheduled_at).format('HH:mm')),
   );
 
