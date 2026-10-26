@@ -7,9 +7,9 @@ import MapView, { Marker, PROVIDER_DEFAULT } from 'react-native-maps';
 import { Avatar, Banner, Button, Card, LoadingScreen, Screen, Text } from '@/components';
 import { radius, spacing } from '@/constants/theme';
 import { useAppointment, useUpdateAppointmentStatus } from '@/features/appointments';
+import { appointmentTime } from '@/features/appointments/api';
 import { StatusBadge } from '@/features/appointments/StatusBadge';
 import { useTheme } from '@/hooks/useTheme';
-import { dayjs } from '@/lib/time';
 
 export default function PatientAppointmentDetailScreen() {
   const { colors } = useTheme();
@@ -27,7 +27,7 @@ export default function PatientAppointmentDetailScreen() {
     );
   }
 
-  const when = dayjs(appointment.scheduled_at);
+  const { when, zoneLabel } = appointmentTime(appointment);
   const isHomeVisit = appointment.visit_type === 'home';
   const canCancel = ['pending', 'confirmed'].includes(appointment.status);
   const address = appointment.patient_addresses;
@@ -87,7 +87,8 @@ export default function PatientAppointmentDetailScreen() {
           <View style={styles.detailBody}>
             <Text variant="bodyStrong">{when.format('dddd, D MMMM YYYY')}</Text>
             <Text variant="caption" color="textMuted">
-              {when.format('h:mm A')} · {appointment.service_offerings?.duration_minutes ?? 0} min
+              {when.format('h:mm A')} {zoneLabel} ·{' '}
+              {appointment.service_offerings?.duration_minutes ?? 0} min
             </Text>
           </View>
         </View>

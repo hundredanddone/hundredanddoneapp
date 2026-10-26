@@ -2,14 +2,44 @@ import dayjs from 'dayjs';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
 import isSameOrAfter from 'dayjs/plugin/isSameOrAfter';
 import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
+import timezone from 'dayjs/plugin/timezone';
+import utc from 'dayjs/plugin/utc';
 
 import type { DayOfWeek, TimeBlock } from '@/types';
 
 dayjs.extend(customParseFormat);
 dayjs.extend(isSameOrAfter);
 dayjs.extend(isSameOrBefore);
+dayjs.extend(utc);
+dayjs.extend(timezone);
 
 export { dayjs };
+
+/** Used only when an organization row has no timezone, which the column default prevents. */
+export const DEFAULT_TIMEZONE = 'Asia/Kolkata';
+
+/** The IANA zone of this device, e.g. 'Asia/Kolkata'. */
+export function deviceTimezone(): string {
+  return Intl.DateTimeFormat().resolvedOptions().timeZone || DEFAULT_TIMEZONE;
+}
+
+/** A timestamp shown in the given zone, for display. */
+export function inZone(instant: string | Date, zone: string) {
+  return dayjs(instant).tz(zone);
+}
+
+/** A wall-clock date ('YYYY-MM-DD') and time ('HH:mm') in a zone, as an ISO instant. */
+export function zonedToIso(date: string, time: string, zone: string): string {
+  return dayjs.tz(`${date} ${time}`, zone).toISOString();
+}
+
+/** Short zone name for display, such as 'GMT+5:30' or 'EST'. Falls back to the IANA name. */
+export function timezoneLabel(zone: string, at: Date = new Date()): string {
+  const part = new Intl.DateTimeFormat('en', { timeZone: zone, timeZoneName: 'short' })
+    .formatToParts(at)
+    .find((p) => p.type === 'timeZoneName');
+  return part?.value ?? zone;
+}
 
 export const DAY_LABELS: Record<DayOfWeek, string> = {
   0: 'Sun',

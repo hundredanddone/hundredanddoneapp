@@ -11,10 +11,10 @@ import {
   useAppointment,
   useUpdateAppointmentStatus,
 } from '@/features/appointments';
+import { appointmentTime } from '@/features/appointments/api';
 import { StatusBadge } from '@/features/appointments/StatusBadge';
 import { useCreatePatientRecord } from '@/features/patient-records';
 import { useTheme } from '@/hooks/useTheme';
-import { dayjs } from '@/lib/time';
 import { useAuthStore } from '@/stores/authStore';
 import type { RecordType } from '@/types';
 
@@ -40,7 +40,7 @@ export default function OrgAppointmentDetailScreen() {
     );
   }
 
-  const when = dayjs(appointment.scheduled_at);
+  const { when, zoneLabel } = appointmentTime(appointment);
   const transitions = nextStatuses(appointment.status, appointment.visit_type);
 
   const handleTransition = async (status: (typeof transitions)[number]) => {
@@ -98,7 +98,9 @@ export default function OrgAppointmentDetailScreen() {
         <View style={styles.detailRow}>
           <Ionicons name="calendar-outline" size={18} color={colors.primary} />
           <View style={styles.detailBody}>
-            <Text variant="bodyStrong">{when.format('dddd, D MMMM YYYY · h:mm A')}</Text>
+            <Text variant="bodyStrong">
+              {`${when.format('dddd, D MMMM YYYY · h:mm A')} ${zoneLabel}`}
+            </Text>
             <Text variant="caption" color="textMuted">
               {appointment.service_offerings?.services?.name ?? 'Appointment'} ·{' '}
               {appointment.service_offerings?.duration_minutes ?? 0} min

@@ -1,10 +1,16 @@
 import { supabase } from '@/lib/supabase';
-import { dayjs } from '@/lib/time';
+import { DEFAULT_TIMEZONE, dayjs, inZone, timezoneLabel } from '@/lib/time';
 import type { Appointment, AppointmentStatus, VisitType } from '@/types';
 
 /** The joined shape every appointment list and detail screen renders. */
 export interface AppointmentWithRelations extends Appointment {
-  organizations: { id: string; name: string; org_type: string; logo_url: string | null } | null;
+  organizations: {
+    id: string;
+    name: string;
+    org_type: string;
+    logo_url: string | null;
+    timezone: string;
+  } | null;
   service_offerings: {
     id: string;
     price: number;
@@ -29,11 +35,23 @@ export interface AppointmentWithRelations extends Appointment {
 
 const SELECT = `
   *,
-  organizations ( id, name, org_type, logo_url ),
+  organizations ( id, name, org_type, logo_url, timezone ),
   service_offerings ( id, price, duration_minutes, visit_type, services ( id, name ) ),
   patient_addresses ( id, label, address, lat, lng ),
   profiles!appointments_patient_id_fkey ( id, full_name, phone, avatar_url )
 `;
+
+/**
+ * The appointment's start time in the provider's timezone, with the zone's short name.
+ * Patients and providers both see the time the provider is working in.
+ */
+export function appointmentTime(appointment: AppointmentWithRelations) {
+  const zone = appointment.organizations?.timezone ?? DEFAULT_TIMEZONE;
+  return {
+    when: inZone(appointment.scheduled_at, zone),
+    zoneLabel: timezoneLabel(zone, new Date(appointment.scheduled_at)),
+  };
+}
 
 export type AppointmentScope = 'upcoming' | 'past';
 

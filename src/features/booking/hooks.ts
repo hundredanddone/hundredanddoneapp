@@ -21,11 +21,22 @@ export function useOffering(offeringId: string | undefined) {
   });
 }
 
-export function useSlots(organizationId: string | undefined, visitType: VisitType, date: string) {
+export function useSlots(
+  organizationId: string | undefined,
+  timezone: string | undefined,
+  visitType: VisitType,
+  date: string,
+) {
   return useQuery({
     queryKey: bookingKeys.slots(organizationId ?? 'none', visitType, date),
-    queryFn: () => fetchSlots({ organizationId: organizationId as string, visitType, date }),
-    enabled: Boolean(organizationId),
+    queryFn: () =>
+      fetchSlots({
+        organizationId: organizationId as string,
+        timezone: timezone as string,
+        visitType,
+        date,
+      }),
+    enabled: Boolean(organizationId && timezone),
     // Slots go stale quickly once other patients start booking.
     staleTime: 15_000,
   });

@@ -11,12 +11,13 @@ import {
   useSlots,
 } from '@/features/booking';
 import { useTheme } from '@/hooks/useTheme';
-import { dayjs, formatTimeLabel } from '@/lib/time';
+import { dayjs, deviceTimezone, formatTimeLabel, timezoneLabel } from '@/lib/time';
 import { useAuthStore } from '@/stores/authStore';
 
-/** Two weeks of bookable dates, starting today. */
-function upcomingDates(count = 14) {
-  return Array.from({ length: count }, (_, index) => dayjs().add(index, 'day'));
+/** Two weeks of bookable dates, starting today in the provider's timezone. */
+function upcomingDates(zone: string, count = 14) {
+  const today = dayjs().tz(zone).startOf('day');
+  return Array.from({ length: count }, (_, index) => today.add(index, 'day'));
 }
 
 export default function BookingScreen() {
@@ -24,16 +25,22 @@ export default function BookingScreen() {
   const { offeringId } = useLocalSearchParams<{ offeringId: string }>();
   const patientId = useAuthStore((s) => s.session?.user.id ?? null);
 
-  const dates = useMemo(() => upcomingDates(), []);
-  const [selectedDate, setSelectedDate] = useState(dayjs().format('YYYY-MM-DD'));
+  const { data: offering, isPending } = useOffering(offeringId);
+  const organizationId = offering?.services?.organization_id;
+  // Until the offering loads, fall back to the device zone so the screen can render.
+  const zone = offering?.services?.organizations?.timezone ?? deviceTimezone();
+
+  const dates = useMemo(() => upcomingDates(zone), [zone]);
+  // `null` means "the first date in the provider's zone", so the default follows the zone.
+  const [pickedDate, setPickedDate] = useState<string | null>(null);
+  const selectedDate = pickedDate ?? dates[0].format('YYYY-MM-DD');
   const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
   const [addressId, setAddressId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const { data: offering, isPending } = useOffering(offeringId);
-  const organizationId = offering?.services?.organization_id;
   const { data: slots = [], isFetching: slotsLoading } = useSlots(
     organizationId,
+    offering?.services?.organizations?.timezone,
     offering?.visit_type ?? 'clinic',
     selectedDate,
   );
@@ -109,7 +116,7 @@ export default function BookingScreen() {
                 accessibilityRole="button"
                 accessibilityState={{ selected }}
                 onPress={() => {
-                  setSelectedDate(key);
+                  setPickedDate(key);
                   setSelectedSlot(null);
                 }}
                 style={[
@@ -140,6 +147,9 @@ export default function BookingScreen() {
 
       <View style={styles.section}>
         <Text variant="heading">Pick a time</Text>
+        <Text variant="caption" color="textMuted">
+          Times are in the clinic timezone: {timezoneLabel(zone)} ({zone})
+        </Text>
         {slotsLoading ? (
           <Text variant="caption" color="textMuted">
             Loading available times…
