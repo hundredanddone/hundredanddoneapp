@@ -1,5 +1,5 @@
 import { supabase } from '@/lib/supabase';
-import { dayjs, fromPgTime, slotsForBlock } from '@/lib/time';
+import { dayjs, fromPgTime, inZone, slotsForBlock, zonedToIso } from '@/lib/time';
 import type {
   Appointment,
   AvailabilityOverride,
@@ -11,7 +11,7 @@ import type {
 const FREE_STATUSES: Appointment['status'][] = ['cancelled', 'no_show'];
 
 export interface Slot {
-  /** 'HH:mm' in the provider's local time. */
+  /** 'HH:mm' in the provider's timezone. */
   time: string;
   /** Full ISO timestamp for `appointments.scheduled_at`. */
   scheduledAt: string;
@@ -20,8 +20,10 @@ export interface Slot {
 
 export interface SlotQuery {
   organizationId: string;
+  /** The organization's IANA timezone. Slots and the day boundaries are computed in this zone. */
+  timezone: string;
   visitType: VisitType;
-  /** 'YYYY-MM-DD' */
+  /** 'YYYY-MM-DD' in the organization's timezone */
   date: string;
   doctorMemberId?: string | null;
 }
@@ -31,11 +33,12 @@ export interface SlotQuery {
  *
  * Slots come from `availability_rules`, minus any date-level block in
  * `availability_overrides`, minus times already taken by a live appointment.
- * Past times on today's date are marked unavailable rather than hidden, so the
- * patient can see that the provider does work then.
+ * Everything is read in the organization's timezone, so a patient in another zone sees
+ * the provider's hours. Past times on today's date are marked unavailable rather than
+ * hidden, so the patient can see that the provider does work then.
  */
 export async function fetchSlots(query: SlotQuery): Promise<Slot[]> {
-  const day = dayjs(query.date);
+  const day = dayjs.tz(query.date, query.timezone);
   const dayOfWeek = day.day() as DayOfWeek;
 
   const [rulesResult, overrideResult, bookedResult] = await Promise.all([
@@ -87,7 +90,7 @@ export async function fetchSlots(query: SlotQuery): Promise<Slot[]> {
         (appointment) =>
           !query.doctorMemberId || appointment.doctor_member_id === query.doctorMemberId,
       )
-      .map((appointment) => dayjs(appointment.scheduled_at).format('HH:mm')),
+      .map((appointment) => inZone(appointment.scheduled_at, query.timezone).format('HH:mm')),
   );
 
   const now = dayjs();
@@ -96,11 +99,11 @@ export async function fetchSlots(query: SlotQuery): Promise<Slot[]> {
   for (const rule of rules) {
     const block = { start: fromPgTime(rule.start_time), end: fromPgTime(rule.end_time) };
     for (const time of slotsForBlock(block, rule.slot_duration_minutes)) {
-      const scheduled = dayjs(`${query.date}T${time}`);
+      const scheduledAt = zonedToIso(query.date, time, query.timezone);
       slots.set(time, {
         time,
-        scheduledAt: scheduled.toISOString(),
-        available: !taken.has(time) && scheduled.isAfter(now),
+        scheduledAt,
+        available: !taken.has(time) && dayjs(scheduledAt).isAfter(now),
       });
     }
   }
@@ -152,7 +155,7 @@ export interface OfferingDetail {
     name: string;
     description: string | null;
     organization_id: string;
-    organizations: { id: string; name: string; logo_url: string | null } | null;
+    organizations: { id: string; name: string; logo_url: string | null; timezone: string } | null;
   } | null;
 }
 
@@ -161,7 +164,7 @@ export async function fetchOffering(offeringId: string): Promise<OfferingDetail 
   const { data, error } = await supabase
     .from('service_offerings')
     .select(
-      'id, visit_type, price, duration_minutes, is_active, services ( id, name, description, organization_id, organizations ( id, name, logo_url ) )',
+      'id, visit_type, price, duration_minutes, is_active, services ( id, name, description, organization_id, organizations ( id, name, logo_url, timezone ) )',
     )
     .eq('id', offeringId)
     .maybeSingle();

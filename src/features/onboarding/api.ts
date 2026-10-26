@@ -1,5 +1,5 @@
 import { supabase } from '@/lib/supabase';
-import { toPgTime } from '@/lib/time';
+import { deviceTimezone, toPgTime } from '@/lib/time';
 import type {
   AccountRole,
   AvailabilityRule,
@@ -55,6 +55,7 @@ export async function createOrganization(
       name,
       verification_status: 'pending',
       onboarding_step: 'basic_info',
+      timezone: deviceTimezone(),
     })
     .select('*')
     .single();

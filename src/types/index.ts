@@ -41,6 +41,8 @@ export interface Organization {
   logo_url: string | null;
   verification_status: VerificationStatus;
   onboarding_step: string | null;
+  /** IANA name, e.g. 'Asia/Kolkata'. Availability and appointment times are read in this zone. */
+  timezone: string;
   created_at: string;
 }
 

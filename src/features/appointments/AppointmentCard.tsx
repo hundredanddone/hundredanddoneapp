@@ -4,9 +4,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { Avatar, Card, Text } from '@/components';
 import { spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/useTheme';
-import { dayjs } from '@/lib/time';
-
-import type { AppointmentWithRelations } from './api';
+import { type AppointmentWithRelations, appointmentTime } from './api';
 import { StatusBadge } from './StatusBadge';
 
 export interface AppointmentCardProps {
@@ -25,7 +23,7 @@ export function AppointmentCard({ appointment, perspective, onPress }: Appointme
       : (appointment.profiles?.full_name ?? 'Patient');
   const avatarUri = perspective === 'patient' ? appointment.organizations?.logo_url : null;
   const serviceName = appointment.service_offerings?.services?.name ?? 'Appointment';
-  const when = dayjs(appointment.scheduled_at);
+  const { when, zoneLabel } = appointmentTime(appointment);
 
   return (
     <Card onPress={onPress}>
@@ -44,7 +42,7 @@ export function AppointmentCard({ appointment, perspective, onPress }: Appointme
         <View style={styles.meta}>
           <Ionicons name="calendar-outline" size={14} color={colors.textMuted} />
           <Text variant="caption" color="textMuted">
-            {when.format('ddd, D MMM · h:mm A')}
+            {`${when.format('ddd, D MMM · h:mm A')} ${zoneLabel}`}
           </Text>
         </View>
         <View style={styles.meta}>
